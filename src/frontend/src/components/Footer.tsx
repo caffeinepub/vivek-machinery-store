@@ -1,6 +1,5 @@
 import { Heart } from "lucide-react";
-
-type Page = "home" | "products" | "contact" | "admin";
+import type { Page } from "./Header";
 
 interface FooterProps {
   onNavigate: (page: Page) => void;
@@ -20,13 +19,14 @@ export default function Footer({ onNavigate }: FooterProps) {
                 className="h-10 w-10 object-contain"
               />
               <span className="font-display text-xl font-bold text-white">
-                Vivek Machinery<br />
+                Vivek Machinery
+                <br />
                 <span className="text-accent">Store</span>
               </span>
             </div>
             <p className="font-body text-sm text-white/60 leading-relaxed">
-              Quality machinery for industrial, agricultural and construction needs.
-              Browse our catalog and send us an inquiry for pricing.
+              Quality machinery for industrial, agricultural and construction
+              needs. Browse our catalog and send us an inquiry for pricing.
             </p>
           </div>
 
@@ -73,7 +73,8 @@ export default function Footer({ onNavigate }: FooterProps) {
             © 2026 Vivek Machinery Store. All rights reserved.
           </p>
           <p className="font-body text-xs text-white/40 flex items-center gap-1">
-            Built with <Heart className="h-3.5 w-3.5 text-accent fill-current" /> using{" "}
+            Built with{" "}
+            <Heart className="h-3.5 w-3.5 text-accent fill-current" /> using{" "}
             <a
               href="https://caffeine.ai"
               target="_blank"

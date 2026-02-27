@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type {
+  Category,
+  InquiryInput,
+  Product,
+  ProductInput,
+} from "../backend.d";
 import { useActor } from "./useActor";
-import type { Product, ProductInput, InquiryInput, Category } from "../backend.d";
 
 // ——— Products ———
 export function useListProducts() {
@@ -133,6 +138,20 @@ export function useMarkInquiryResolved() {
 }
 
 // ——— Auth / Roles ———
+export function useInitializeAdminAccess() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (token: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor._initializeAccessControlWithSecret(token);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+    },
+  });
+}
+
 export function useIsAdmin() {
   const { actor, isFetching } = useActor();
   return useQuery<boolean>({

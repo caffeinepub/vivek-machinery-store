@@ -1,14 +1,29 @@
-import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { useState } from "react";
+import AdminPage from "./components/AdminPage";
+import Footer from "./components/Footer";
 import Header from "./components/Header";
+import type { Page } from "./components/Header";
 import HeroSection from "./components/HeroSection";
 import ProductsSection from "./components/ProductsSection";
-import AdminPanel from "./components/AdminPanel";
-import Footer from "./components/Footer";
 
-type Page = "home" | "products" | "contact" | "admin";
+// Route /admin to the standalone AdminPage (no public header/footer)
+const isAdminRoute = window.location.pathname === "/admin";
 
 export default function App() {
+  if (isAdminRoute) {
+    return (
+      <>
+        <AdminPage />
+        <Toaster richColors position="top-right" />
+      </>
+    );
+  }
+
+  return <PublicStore />;
+}
+
+function PublicStore() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
 
   return (
@@ -23,7 +38,6 @@ export default function App() {
         )}
         {currentPage === "products" && <ProductsSection fullPage />}
         {currentPage === "contact" && <ContactSection />}
-        {currentPage === "admin" && <AdminPanel />}
       </main>
       <Footer onNavigate={setCurrentPage} />
       <Toaster richColors position="top-right" />
@@ -49,8 +63,10 @@ function ContactSection() {
           </div>
           <h3 className="font-display text-xl font-semibold mb-2">Address</h3>
           <p className="text-muted-foreground text-sm">
-            Vivek Machinery Store<br />
-            Industrial Area, Main Market<br />
+            Vivek Machinery Store
+            <br />
+            Industrial Area, Main Market
+            <br />
             India
           </p>
         </div>
@@ -60,7 +76,8 @@ function ContactSection() {
           </div>
           <h3 className="font-display text-xl font-semibold mb-2">Phone</h3>
           <p className="text-muted-foreground text-sm">
-            +91 XXXXX XXXXX<br />
+            +91 XXXXX XXXXX
+            <br />
             Mon – Sat, 9am – 6pm
           </p>
         </div>
@@ -70,7 +87,8 @@ function ContactSection() {
           </div>
           <h3 className="font-display text-xl font-semibold mb-2">Email</h3>
           <p className="text-muted-foreground text-sm">
-            info@vivekmachinery.com<br />
+            info@vivekmachinery.com
+            <br />
             We reply within 24 hours
           </p>
         </div>

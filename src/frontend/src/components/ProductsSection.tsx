@@ -1,19 +1,21 @@
-import { useState, useMemo } from "react";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, PackageOpen, IndianRupee } from "lucide-react";
-import { useListProducts, useListCategories } from "../hooks/useQueries";
+import { IndianRupee, PackageOpen, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { Product } from "../backend.d";
-import ProductDetailModal from "./ProductDetailModal";
+import { useListCategories, useListProducts } from "../hooks/useQueries";
 import InquiryFormModal from "./InquiryFormModal";
+import ProductDetailModal from "./ProductDetailModal";
 
 interface ProductsSectionProps {
   fullPage?: boolean;
 }
 
-export default function ProductsSection({ fullPage = false }: ProductsSectionProps) {
+export default function ProductsSection({
+  fullPage = false,
+}: ProductsSectionProps) {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -29,8 +31,7 @@ export default function ProductsSection({ fullPage = false }: ProductsSectionPro
       const matchesCategory =
         selectedCategory === "All" || p.category === selectedCategory;
       const matchesSearch =
-        !search.trim() ||
-        p.name.toLowerCase().includes(search.toLowerCase());
+        !search.trim() || p.name.toLowerCase().includes(search.toLowerCase());
       return matchesCategory && matchesSearch;
     });
   }, [products, selectedCategory, search]);
@@ -93,8 +94,11 @@ export default function ProductsSection({ fullPage = false }: ProductsSectionPro
         {/* Products Grid */}
         {productsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {["s1","s2","s3","s4","s5","s6","s7","s8"].map((key) => (
-              <div key={key} className="bg-card rounded-xl overflow-hidden border border-border">
+            {["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"].map((key) => (
+              <div
+                key={key}
+                className="bg-card rounded-xl overflow-hidden border border-border"
+              >
                 <Skeleton className="h-48 w-full" />
                 <div className="p-4 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -107,8 +111,12 @@ export default function ProductsSection({ fullPage = false }: ProductsSectionPro
         ) : filteredProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <PackageOpen className="h-16 w-16 mb-4 opacity-30" />
-            <p className="font-display text-2xl font-semibold mb-1">No Products Found</p>
-            <p className="font-body text-sm">Try a different search or category filter.</p>
+            <p className="font-display text-2xl font-semibold mb-1">
+              No Products Found
+            </p>
+            <p className="font-body text-sm">
+              Try a different search or category filter.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -152,7 +160,12 @@ interface ProductCardProps {
   onInquiry: () => void;
 }
 
-function ProductCard({ product, formatPrice, onView, onInquiry }: ProductCardProps) {
+function ProductCard({
+  product,
+  formatPrice,
+  onView,
+  onInquiry,
+}: ProductCardProps) {
   return (
     <div className="bg-card rounded-xl overflow-hidden border border-border shadow-card card-hover group">
       {/* Image */}
@@ -167,7 +180,8 @@ function ProductCard({ product, formatPrice, onView, onInquiry }: ProductCardPro
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = "/assets/generated/vivek-logo-transparent.dim_300x300.png";
+              (e.target as HTMLImageElement).src =
+                "/assets/generated/vivek-logo-transparent.dim_300x300.png";
             }}
           />
         ) : (

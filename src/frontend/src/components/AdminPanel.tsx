@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -12,38 +16,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Loader2,
-  Plus,
-  Pencil,
-  Trash2,
   CheckCircle2,
-  PackageOpen,
-  IndianRupee,
-  ShieldAlert,
   InboxIcon,
+  IndianRupee,
+  KeyRound,
+  Loader2,
+  PackageOpen,
+  Pencil,
+  Plus,
+  ShieldAlert,
+  Trash2,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import {
-  useListProducts,
-  useListCategories,
-  useCreateProduct,
-  useUpdateProduct,
-  useDeleteProduct,
-  useGetAllInquiries,
-  useMarkInquiryResolved,
-  useIsAdmin,
-} from "../hooks/useQueries";
 import type { Product, ProductInput } from "../backend.d";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import {
+  useCreateProduct,
+  useDeleteProduct,
+  useGetAllInquiries,
+  useInitializeAdminAccess,
+  useIsAdmin,
+  useListCategories,
+  useListProducts,
+  useMarkInquiryResolved,
+  useUpdateProduct,
+} from "../hooks/useQueries";
 
 interface ProductFormState {
   name: string;
@@ -102,17 +104,7 @@ export default function AdminPanel() {
   }
 
   if (!isAdmin) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
-        <ShieldAlert className="h-16 w-16 text-destructive/40 mb-4" />
-        <h2 className="font-display text-3xl font-bold mb-2 text-foreground">
-          Access Denied
-        </h2>
-        <p className="text-muted-foreground font-body text-center max-w-sm">
-          Your account does not have admin privileges.
-        </p>
-      </div>
-    );
+    return <AdminSetup />;
   }
 
   return (
@@ -144,6 +136,100 @@ export default function AdminPanel() {
           <InquiriesManager />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// ——————————————————————————————————————————————
+// Admin Setup (claim admin token)
+// ——————————————————————————————————————————————
+
+function AdminSetup() {
+  const [token, setToken] = useState("");
+  const initAdmin = useInitializeAdminAccess();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!token.trim()) {
+      toast.error("Please enter your admin secret token.");
+      return;
+    }
+    try {
+      await initAdmin.mutateAsync(token);
+      toast.success("Admin access granted! Welcome.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      if (
+        message.toLowerCase().includes("already") ||
+        message.toLowerCase().includes("assigned")
+      ) {
+        toast.error(
+          "Admin is already assigned to another account. Please use the account that first set up admin access.",
+        );
+      } else {
+        toast.error(
+          "Incorrect token. Make sure you are using the correct admin secret.",
+        );
+      }
+    }
+  }
+
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center mb-6">
+          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <KeyRound className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="font-display text-3xl font-bold text-foreground mb-2 text-center">
+            Admin Login
+          </h2>
+          <p className="text-muted-foreground font-body text-center text-sm max-w-xs">
+            Enter your admin secret token to claim or verify admin access for
+            this store.
+          </p>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4"
+        >
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="admin-token"
+              className="font-body font-medium text-sm"
+            >
+              Admin Secret Token
+            </Label>
+            <Input
+              id="admin-token"
+              type="password"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="Enter your secret token"
+              autoComplete="current-password"
+              className="font-body"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-body"
+            disabled={initAdmin.isPending}
+          >
+            {initAdmin.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <KeyRound className="h-4 w-4 mr-2" />
+            )}
+            {initAdmin.isPending ? "Verifying..." : "Login as Admin"}
+          </Button>
+        </form>
+
+        <p className="text-xs text-muted-foreground font-body text-center mt-4">
+          The admin secret token was set when this store was created.
+        </p>
+      </div>
     </div>
   );
 }
@@ -185,7 +271,7 @@ function ProductsManager() {
   }
 
   function handleFormChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -197,14 +283,16 @@ function ProductsManager() {
       toast.error("Name and category are required.");
       return;
     }
-    const priceInPaise = BigInt(Math.round(parseFloat(form.price || "0") * 100));
+    const priceInPaise = BigInt(
+      Math.round(Number.parseFloat(form.price || "0") * 100),
+    );
     const input: ProductInput = {
       name: form.name,
       description: form.description,
       price: priceInPaise,
       category: form.category,
       imageUrl: form.imageUrl,
-      stock: BigInt(parseInt(form.stock || "0")),
+      stock: BigInt(Number.parseInt(form.stock || "0")),
       available: form.available,
     };
 
@@ -256,7 +344,7 @@ function ProductsManager() {
 
       {isLoading ? (
         <div className="space-y-3">
-          {["l1","l2","l3","l4"].map((k) => (
+          {["l1", "l2", "l3", "l4"].map((k) => (
             <Skeleton key={k} className="h-16 w-full rounded-lg" />
           ))}
         </div>
@@ -264,7 +352,9 @@ function ProductsManager() {
         <div className="flex flex-col items-center py-16 text-muted-foreground">
           <PackageOpen className="h-14 w-14 mb-3 opacity-30" />
           <p className="font-display text-xl font-semibold">No products yet</p>
-          <p className="font-body text-sm">Click "Add Product" to get started.</p>
+          <p className="font-body text-sm">
+            Click "Add Product" to get started.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -354,7 +444,10 @@ function ProductsManager() {
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
             <div className="space-y-1.5">
-              <Label htmlFor="prod-name" className="font-body font-medium text-sm">
+              <Label
+                htmlFor="prod-name"
+                className="font-body font-medium text-sm"
+              >
                 Name <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -368,7 +461,10 @@ function ProductsManager() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="prod-desc" className="font-body font-medium text-sm">
+              <Label
+                htmlFor="prod-desc"
+                className="font-body font-medium text-sm"
+              >
                 Description
               </Label>
               <Textarea
@@ -383,7 +479,10 @@ function ProductsManager() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="prod-price" className="font-body font-medium text-sm">
+                <Label
+                  htmlFor="prod-price"
+                  className="font-body font-medium text-sm"
+                >
                   Price (₹) <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
@@ -404,7 +503,10 @@ function ProductsManager() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="prod-stock" className="font-body font-medium text-sm">
+                <Label
+                  htmlFor="prod-stock"
+                  className="font-body font-medium text-sm"
+                >
                   Stock Quantity
                 </Label>
                 <Input
@@ -420,7 +522,10 @@ function ProductsManager() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="prod-category" className="font-body font-medium text-sm">
+              <Label
+                htmlFor="prod-category"
+                className="font-body font-medium text-sm"
+              >
                 Category <span className="text-destructive">*</span>
               </Label>
               <Select
@@ -448,7 +553,10 @@ function ProductsManager() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="prod-image" className="font-body font-medium text-sm">
+              <Label
+                htmlFor="prod-image"
+                className="font-body font-medium text-sm"
+              >
                 Image URL
               </Label>
               <Input
@@ -484,7 +592,10 @@ function ProductsManager() {
                   }))
                 }
               />
-              <Label htmlFor="prod-available" className="font-body text-sm cursor-pointer">
+              <Label
+                htmlFor="prod-available"
+                className="font-body text-sm cursor-pointer"
+              >
                 Available for inquiry
               </Label>
             </div>
@@ -503,7 +614,7 @@ function ProductsManager() {
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 font-body"
                 disabled={createProduct.isPending || updateProduct.isPending}
               >
-                {(createProduct.isPending || updateProduct.isPending) ? (
+                {createProduct.isPending || updateProduct.isPending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : null}
                 {editTarget ? "Update Product" : "Create Product"}
@@ -525,7 +636,8 @@ function ProductsManager() {
             </DialogTitle>
           </DialogHeader>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            This action cannot be undone. The product will be permanently removed.
+            This action cannot be undone. The product will be permanently
+            removed.
           </p>
           <div className="flex gap-3 mt-4">
             <Button
@@ -577,7 +689,7 @@ function InquiriesManager() {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {["i1","i2","i3"].map((k) => (
+        {["i1", "i2", "i3"].map((k) => (
           <Skeleton key={k} className="h-24 w-full rounded-lg" />
         ))}
       </div>
@@ -589,7 +701,9 @@ function InquiriesManager() {
       <div className="flex flex-col items-center py-16 text-muted-foreground">
         <InboxIcon className="h-14 w-14 mb-3 opacity-30" />
         <p className="font-display text-xl font-semibold">No inquiries yet</p>
-        <p className="font-body text-sm">Customer inquiries will appear here.</p>
+        <p className="font-body text-sm">
+          Customer inquiries will appear here.
+        </p>
       </div>
     );
   }
@@ -630,7 +744,10 @@ function InquiriesManager() {
                     {inquiry.name}
                   </p>
                   {inquiry.resolved ? (
-                    <Badge variant="secondary" className="text-xs font-body gap-1">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs font-body gap-1"
+                    >
                       <CheckCircle2 className="h-3 w-3" />
                       Resolved
                     </Badge>

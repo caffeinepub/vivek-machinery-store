@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Wrench, Settings, Truck } from "lucide-react";
+import { ChevronRight, Settings, Truck, Wrench } from "lucide-react";
 
 interface HeroSectionProps {
   onBrowse: () => void;
@@ -61,9 +61,15 @@ export default function HeroSection({ onBrowse }: HeroSectionProps) {
           {/* Stats */}
           <div className="mt-14 grid grid-cols-3 gap-6 max-w-sm">
             {[
-              { icon: <Wrench className="h-5 w-5" />, label: "Tools & Equipment" },
+              {
+                icon: <Wrench className="h-5 w-5" />,
+                label: "Tools & Equipment",
+              },
               { icon: <Truck className="h-5 w-5" />, label: "Fast Delivery" },
-              { icon: <Settings className="h-5 w-5" />, label: "Genuine Parts" },
+              {
+                icon: <Settings className="h-5 w-5" />,
+                label: "Genuine Parts",
+              },
             ].map((item) => (
               <div key={item.label} className="text-center">
                 <div className="w-10 h-10 mx-auto rounded-full bg-white/10 flex items-center justify-center text-accent mb-2">

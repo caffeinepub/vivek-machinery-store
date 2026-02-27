@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, SendHorizonal } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useSubmitInquiry } from "../hooks/useQueries";
 import type { Product } from "../backend.d";
+import { useSubmitInquiry } from "../hooks/useQueries";
 
 interface InquiryFormModalProps {
   product: Product | null;
@@ -50,7 +50,7 @@ export default function InquiryFormModal({
   }, [product]);
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -72,9 +72,7 @@ export default function InquiryFormModal({
         message: form.message,
         productId: product?.id,
       });
-      toast.success(
-        "Inquiry submitted! We'll get back to you shortly."
-      );
+      toast.success("Inquiry submitted! We'll get back to you shortly.");
       setForm(EMPTY_FORM);
       onClose();
     } catch {
@@ -99,7 +97,10 @@ export default function InquiryFormModal({
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="inquiry-name" className="font-body font-medium text-sm">
+              <Label
+                htmlFor="inquiry-name"
+                className="font-body font-medium text-sm"
+              >
                 Your Name <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -112,7 +113,10 @@ export default function InquiryFormModal({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="inquiry-phone" className="font-body font-medium text-sm">
+              <Label
+                htmlFor="inquiry-phone"
+                className="font-body font-medium text-sm"
+              >
                 Phone
               </Label>
               <Input
@@ -127,7 +131,10 @@ export default function InquiryFormModal({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="inquiry-email" className="font-body font-medium text-sm">
+            <Label
+              htmlFor="inquiry-email"
+              className="font-body font-medium text-sm"
+            >
               Email <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -142,7 +149,10 @@ export default function InquiryFormModal({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="inquiry-product" className="font-body font-medium text-sm">
+            <Label
+              htmlFor="inquiry-product"
+              className="font-body font-medium text-sm"
+            >
               Product
             </Label>
             <Input
@@ -155,7 +165,10 @@ export default function InquiryFormModal({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="inquiry-message" className="font-body font-medium text-sm">
+            <Label
+              htmlFor="inquiry-message"
+              className="font-body font-medium text-sm"
+            >
               Message <span className="text-destructive">*</span>
             </Label>
             <Textarea

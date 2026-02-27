@@ -1,10 +1,7 @@
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn, LogOut } from "lucide-react";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
-import { useIsAdmin } from "../hooks/useQueries";
 
-type Page = "home" | "products" | "contact" | "admin";
+export type Page = "home" | "products" | "contact";
 
 interface HeaderProps {
   currentPage: Page;
@@ -13,19 +10,12 @@ interface HeaderProps {
 
 export default function Header({ currentPage, onNavigate }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { login, clear, identity, isLoggingIn } = useInternetIdentity();
-  const { data: isAdmin } = useIsAdmin();
 
-  const isLoggedIn = !!identity;
-
-  const navLinks: { label: string; page: Page; adminOnly?: boolean }[] = [
+  const navLinks: { label: string; page: Page }[] = [
     { label: "Home", page: "home" },
     { label: "Products", page: "products" },
     { label: "Contact Us", page: "contact" },
-    { label: "Admin", page: "admin", adminOnly: true },
   ];
-
-  const visibleLinks = navLinks.filter((l) => !l.adminOnly || isAdmin);
 
   function handleNav(page: Page) {
     onNavigate(page);
@@ -48,14 +38,15 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
               className="h-10 w-10 object-contain"
             />
             <span className="font-display text-xl font-bold text-white leading-tight">
-              Vivek Machinery<br className="hidden xs:block" />
+              Vivek Machinery
+              <br className="hidden xs:block" />
               <span className="text-orange-DEFAULT"> Store</span>
             </span>
           </button>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {visibleLinks.map((link) => (
+            {navLinks.map((link) => (
               <button
                 type="button"
                 key={link.page}
@@ -74,36 +65,18 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
             ))}
           </nav>
 
-          {/* Auth + Mobile Toggle */}
-          <div className="flex items-center gap-3">
-            {isLoggedIn ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clear}
-                className="hidden md:flex items-center gap-2 border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                onClick={login}
-                disabled={isLoggingIn}
-                className="hidden md:flex items-center gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
-              >
-                <LogIn className="h-4 w-4" />
-                {isLoggingIn ? "Logging in..." : "Login"}
-              </Button>
-            )}
-
+          {/* Mobile Toggle */}
+          <div className="flex items-center">
             <button
               type="button"
               onClick={() => setMobileOpen((o) => !o)}
               className="md:hidden p-2 text-white hover:bg-white/10 rounded-md transition-colors"
             >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
@@ -111,7 +84,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
         {/* Mobile Menu */}
         {mobileOpen && (
           <div className="md:hidden border-t border-white/10 py-3 space-y-1 animate-fade-in">
-            {visibleLinks.map((link) => (
+            {navLinks.map((link) => (
               <button
                 type="button"
                 key={link.page}
@@ -128,29 +101,6 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
                 {link.label}
               </button>
             ))}
-            <div className="pt-2 px-4">
-              {isLoggedIn ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clear}
-                  className="w-full border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent"
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={login}
-                  disabled={isLoggingIn}
-                  className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  {isLoggingIn ? "Logging in..." : "Login"}
-                </Button>
-              )}
-            </div>
           </div>
         )}
       </div>

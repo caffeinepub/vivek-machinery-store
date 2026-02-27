@@ -1,12 +1,12 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { IndianRupee, PackageOpen, MessageSquare } from "lucide-react";
+import { IndianRupee, MessageSquare, PackageOpen } from "lucide-react";
 import type { Product } from "../backend.d";
 
 interface ProductDetailModalProps {
